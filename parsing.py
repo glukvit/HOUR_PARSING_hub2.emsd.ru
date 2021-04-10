@@ -5,15 +5,14 @@ import obspy
 import pandas as pd
 import os
 
-path = '/home/vitaly/TEMP_DATA/STREAM/KLYT_hour_averaging.csv'
+path = '/home/gluk/TEMP_DATA/STREAM/KLYT_hour_averaging.csv' #Тестовый путь !!!ПОМЕНЯТЬ НА РАБОЧЕМ СКРИПТЕ!!!
 curtime = datetime.datetime.now()-datetime.timedelta(seconds=46800) #Получаем текущую дату !!!!ДЕЛЬТА УЧИТЫВАЕТ ЧАСОВОЙ ПОЯС+ еще один час чтобы получить уже прошедший час!!!
 date_str = datetime.datetime.strftime(curtime, '%Y%m%d-%H') #Конвертим дату в стринг в формате 20210408-11
-#date_for_fin_df = curtime-datetime.timedelta(seconds=3600)
 date_for_fin_df = datetime.datetime.strftime(curtime, '%Y%m%d%H')
 print(date_for_fin_df)
+
 #Создаем списки каналов для каждой станции
 KLYT = ['KLYT***HAE', 'KLYT***HAN', 'KLYT***HK2']
-IVST = ['IVST***HAE','IVST***HAN','IVST***HK2']
 Durations=3600 #Длительность выборки 1 час
 url = 'http://hub2.emsd.ru:9000/' # Адрес нашего сервера
 
@@ -58,7 +57,7 @@ def get_file(date_str,channel,request): # Процедура запроса на
     return(df_temp)
     
 df=pd.DataFrame() #Объявляем пустой датафрей. В него запишием все каналы с дискретизацией 1 отсчет в минуту.
-df_fin=pd.DataFrame()#Пустой датафрейм куда запишем окончательные осредненные данные
+df_fin=pd.DataFrame()#Пустой датафрейм куда запишем окончательные осредненные данные добавляемые в файл.
 #Создаем строки запросов для каждого канала это для KLYT
 for every in KLYT: #Перебираем списки каналов
     #Создаем строку запроса: сервер+дата в формате 20210408-05+минуты 00 + секунды 00 расширение с ? и запрос =
@@ -66,16 +65,15 @@ for every in KLYT: #Перебираем списки каналов
     request=url+date_str+'-00-00.msd?DATREQ='+every+'+'+date_str[0:4]+'%2F'+date_str[4:6]+'%2F'+date_str[6:8]+'+'+date_str[9:11]+'%3A00%3A00+3600'
     df_temp=get_file(date_str,every,request) #Процедура запроса. На вход дата формате 20210408-05б, канал, строка запроса,пустой df_temp
     df=pd.concat([df,df_temp], axis=1) #Объединяем финальный датафрейм df и фрейм на котором новые данные df_temp. Добавляются столбцы
-#print(df)
-print(df_mean(df))
-df_fin = df_mean(df)
-#print(df_fin)
-if os.path.exists(path):
-    df_fin=pd.read_csv(path)
-    if len(df_fin) > 336
-df_fin.to_csv('/home/vitaly/TEMP_DATA/STREAM/KLYT_hour_averaging.csv', index=False) #Тестовый путь
 
-#df_fin.to_csv('/home/gluhov/TEMP_DATA/STREAM/KLYT_hour_averaging.csv', index=False) #Путь когда будет стоять на виртуальном сервере
-# for every in IVST:
-#      request=url+date_str+'-00-00.msd?DATREQ='+every+'+'+date_str[0:4]+'%2F'+date_str[4:6]+'%2F'+date_str[6:8]+'+'+date_str[9:11]+'%3A00%3A00+3600'
-#      get_file(date_str,every,request,df_temp)
+df_new_line = df_mean(df) #Осредняем в процедурем mean. Получаем одну строку за 1 час вместо 60 минутных строк.
+#Дозапись новых данный в существующий файл датафрейм двухнедельных часовых файлов.
+if os.path.exists(path): # Проверяем наличие двухнедельного файла 
+    df_fin=pd.read_csv(path) #Если есть открываем файл
+    if len(df_fin) > 336: # Проверяем длину файла если больше чем 336 строк(2 недели по одному часу) то:
+        df_fin.drop(index=0, inplace=True) # Удаляем первую строку (старые данные) по индексу
+        df_fin=df_fin.reset_index(drop=True) #Восстанавливаем порядок индексов
+df_fin=pd.concat([df_fin,df_new_line]) # Добавляем новые данные из df_new_line в записываемый в файл df_fin. 
+df_fin=df_fin.drop_duplicates(subset=['DATE'],keep=False) #Если есть дубликаты в строках удаляем. Проверка дубликатов по столбцу 'DATE'
+#df_fin=df_fin.reset_index(drop=True) #Если не сбросить индекс записывает без удалений дубликатов!!!
+df_fin.to_csv(path, index=False) #Тестовый путь
