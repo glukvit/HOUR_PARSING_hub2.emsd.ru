@@ -5,19 +5,20 @@ import obspy
 import pandas as pd
 import os
 
-curtime=datetime.datetime.now()-datetime.timedelta(seconds=46800) #Получаем текущую дату !!!!ДЕЛЬТА УЧИТЫВАЕТ ЧАСОВОЙ ПОЯС+ еще один час чтобы получить уже прошедший час!!!
-date_str=datetime.datetime.strftime(curtime, '%Y%m%d-%H') #Конвертим дату в стринг в формате 20210408-11
+path = '/home/vitaly/TEMP_DATA/STREAM/KLYT_hour_averaging.csv'
+curtime = datetime.datetime.now()-datetime.timedelta(seconds=46800) #Получаем текущую дату !!!!ДЕЛЬТА УЧИТЫВАЕТ ЧАСОВОЙ ПОЯС+ еще один час чтобы получить уже прошедший час!!!
+date_str = datetime.datetime.strftime(curtime, '%Y%m%d-%H') #Конвертим дату в стринг в формате 20210408-11
 #date_for_fin_df = curtime-datetime.timedelta(seconds=3600)
 date_for_fin_df = datetime.datetime.strftime(curtime, '%Y%m%d%H')
 print(date_for_fin_df)
 #Создаем списки каналов для каждой станции
-KLYT=['KLYT***HAE', 'KLYT***HAN', 'KLYT***HK2']
-IVST=['IVST***HAE','IVST***HAN','IVST***HK2']
+KLYT = ['KLYT***HAE', 'KLYT***HAN', 'KLYT***HK2']
+IVST = ['IVST***HAE','IVST***HAN','IVST***HK2']
 Durations=3600 #Длительность выборки 1 час
-url='http://hub2.emsd.ru:9000/' # Адрес нашего сервера
+url = 'http://hub2.emsd.ru:9000/' # Адрес нашего сервера
 
 def df_mean(df): #Создание окончательно датафрейм который запишется в файл
-    df_fin=pd.DataFrame()#Пустой датафрейм куда запишем окончательные осредненные данные
+    df_fin = pd.DataFrame()#Пустой датафрейм куда запишем окончательные осредненные данные
     df_fin.loc[0,'DATE'] = date_for_fin_df #В окончательный датафрейм первый столбец дата в формате 2021041005
     df_fin.loc[0,'HAE'] = df['HAE'].mean() #Осредняем до одного столбец с минутными отсчетами до одного часа
     df_fin.loc[0,'HAN'] = df['HAN'].mean()
@@ -25,7 +26,7 @@ def df_mean(df): #Создание окончательно датафрейм �
     return(df_fin)
 
 def decimate(datas): #Децимация. 
-    decimated_st=datas.decimate(6000,strict_length=False, no_filter=True) #6000 фактор децимации делает из 100 Гц. один отсчет в минуту. 
+    decimated_st = datas.decimate(6000,strict_length = False, no_filter = True) #6000 фактор децимации делает из 100 Гц. один отсчет в минуту. 
     return(decimated_st)#Возвращает дицимированные данные в сейсмическом формате в поцедуру make_df_temp
 
 def make_df_temp(file_name,station_name,channel): #Временный датафрейм.Децимация. На вход имя обрабатываемого msd 
@@ -68,8 +69,11 @@ for every in KLYT: #Перебираем списки каналов
 #print(df)
 print(df_mean(df))
 df_fin = df_mean(df)
-print(df_fin)
-df_fin.to_csv('/home/gluk/TEMP_DATA/STREAM/KLYT_hour_averaging.csv', index=False) #Тестовый путь
+#print(df_fin)
+if os.path.exists(path):
+    df_fin=pd.read_csv(path)
+    if len(df_fin) > 336
+df_fin.to_csv('/home/vitaly/TEMP_DATA/STREAM/KLYT_hour_averaging.csv', index=False) #Тестовый путь
 
 #df_fin.to_csv('/home/gluhov/TEMP_DATA/STREAM/KLYT_hour_averaging.csv', index=False) #Путь когда будет стоять на виртуальном сервере
 # for every in IVST:
