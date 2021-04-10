@@ -50,7 +50,8 @@ for every in KLYT: #Перебираем списки каналов
     request=url+date_str+'-00-00.msd?DATREQ='+every+'+'+date_str[0:4]+'%2F'+date_str[4:6]+'%2F'+date_str[6:8]+'+'+date_str[9:11]+'%3A00%3A00+3600'
     df_temp=get_file(date_str,every,request) #Процедура запроса. На вход дата формате 20210408-05б, канал, строка запроса,пустой df_temp
     df=pd.concat([df,df_temp], axis=1) #Объединяем финальный датафрейм df и фрейм на котором новые данные df_temp. Добавляются столбцы
-print(df)   
+print(df)
+   
 # for every in IVST:
 #      request=url+date_str+'-00-00.msd?DATREQ='+every+'+'+date_str[0:4]+'%2F'+date_str[4:6]+'%2F'+date_str[6:8]+'+'+date_str[9:11]+'%3A00%3A00+3600'
 #      get_file(date_str,every,request,df_temp)
