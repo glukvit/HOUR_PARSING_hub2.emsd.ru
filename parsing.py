@@ -3,7 +3,7 @@ import datetime
 import glob
 import obspy
 import pandas as pd
-
+import os
 
 curtime=datetime.datetime.now()-datetime.timedelta(seconds=46800) #Получаем текущую дату !!!!ДЕЛЬТА УЧИТЫВАЕТ ЧАСОВОЙ ПОЯС+ еще один час чтобы получить уже прошедший час!!!
 date_str=datetime.datetime.strftime(curtime, '%Y%m%d-%H') #Конвертим дату в стринг в формате 20210408-11
@@ -40,7 +40,8 @@ def make_df_temp(file_name,station_name,channel): #Временный датаф
     elif station_name =='KLYT' and channel=='HK2':
         decimated_st=decimate(st[0])
         df_temp=pd.DataFrame({'HK2':decimated_st.data})
-  #  print(decimated_st.data)    
+  #  print(decimated_st.data)
+    os.remove(file_name) #Удаляем msd файл
     return(df_temp) #Возвращаем временный датафрейм с децимированными данными в основной цикл
 
 def get_file(date_str,channel,request): # Процедура запроса на вход дата, канал, строка запроса
