@@ -9,7 +9,7 @@ path = '/home/gluk/TEMP_DATA/STREAM/KLYT_hour_averaging.csv' #Тестовый �
 curtime = datetime.datetime.now()-datetime.timedelta(seconds=46800) #Получаем текущую дату !!!!ДЕЛЬТА УЧИТЫВАЕТ ЧАСОВОЙ ПОЯС+ еще один час чтобы получить уже прошедший час!!!
 date_str = datetime.datetime.strftime(curtime, '%Y%m%d-%H') #Конвертим дату в стринг в формате 20210408-11
 date_for_fin_df = datetime.datetime.strftime(curtime, '%Y%m%d%H')
-print(date_for_fin_df)
+#print(date_for_fin_df)
 
 #Создаем списки каналов для каждой станции
 KLYT = ['KLYT***HAE', 'KLYT***HAN', 'KLYT***HK2']
